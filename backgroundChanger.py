@@ -3,6 +3,7 @@ import os
 import requests
 import subprocess
 import time
+import desktop
 
 downloader = deviantArt()
 
@@ -21,15 +22,25 @@ for url in downloader.getWallpaperURL():
             for chunk in r:
                 f.write(chunk)
         abspath = os.path.abspath(filename)
-
+        print(abspath)
+        sleeptime = max((5*60) - (time.time() - oldtime), 0)
+        print("sleeping for", sleeptime)
         # sleep for 5 minutes between attempts
-        time.sleep(max((5*60) - (time.time() - oldtime), 0))
+        time.sleep(sleeptime)
+        oldtime = time.time()
+
+        print("setting wallpaper now!")
+        retval = desktop.set_wallpaper(abspath)
+        if not retval:
+            print("failed to set desktop wallpaper")
+        else:
+            print("successfully set desktop wallpaper")
 
         # xfce specific, this section needs to be generalized
         # TODO make this work on all systems?
-        subprocess.call(["xfconf-query", "-c", "xfce4-desktop", "-p",
-                         "/backdrop/screen0/monitor0/workspace0/last-image", "-s", abspath])
-        subprocess.call(["xfconf-query", "-c", "xfce4-desktop", "-p",
-                         "/backdrop/screen0/monitor0/image-path", "-s", abspath])
+        #subprocess.call(["xfconf-query", "-c", "xfce4-desktop", "-p",
+        #                 "/backdrop/screen0/monitor0/workspace0/last-image", "-s", abspath])
+        #subprocess.call(["xfconf-query", "-c", "xfce4-desktop", "-p",
+        #                 "/backdrop/screen0/monitor0/image-path", "-s", abspath])
     except:
         continue

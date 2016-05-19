@@ -37,7 +37,7 @@ class deviantArt(baseAuth.baseAuth):
     def getPopularAlltime(self, offset=0):
         popularURL = "https://www.deviantart.com/api/v1/oauth2/browse/popular"
         params = {
-                "timerange": "alltime",
+                "timerange": "8hr",
                 "offset": str(offset),
             }
         params.update(self.access_token_dict)
@@ -52,13 +52,15 @@ class deviantArt(baseAuth.baseAuth):
                 yield r
 
             # craft next page
+            # will reset to 0 instead of returning
             if (response.get("has_more") == "true") or (response.get("has_more") == True):
                 self.popular_offset = int(response.get("next_offset"))
-                # write the offset to file just in case
-                self.writeConfig()
-                time.sleep(1)
             else:
-                return
+                self.popular_offset = 0
+
+            print(self.popular_offset)
+            self.writeConfig()
+            time.sleep(1)
 
     def getImageURLFromItem(self, item):
         try:
